@@ -2,20 +2,60 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/src/context/AuthContext';
-import { Search, Send, MoreVertical } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Search, Send, MoreVertical, Trash2, Archive, Flag } from 'lucide-react';
 
 const MessagesPage: React.FC = () => {
   const { user } = useAuth();
   const router = useRouter();
   const [selectedChat, setSelectedChat] = useState('Nimolai');
   const [messageText, setMessageText] = useState('');
-
-  if (!user) {
-    return null;
-  }
-
-  const conversations = [
+  const [allMessages, setAllMessages] = useState<Record<string, Array<{
+    id: number;
+    sender: string;
+    text: string;
+    time: string;
+    isRead: boolean;
+  }>>>({
+    'Nimolai': [
+      {
+        id: 1,
+        sender: 'Nimolai',
+        text: 'DUN GECE NÖNETÇIYIK 5 ADET VAR. UYGUN OLUR MU SIZIN IÇIN ?',
+        time: '26.08.2025 | 15:33',
+        isRead: true
+      }
+    ],
+    'mugemedikal': [
+      {
+        id: 2,
+        sender: 'mugemedikal',
+        text: '?',
+        time: '23.08.2025 | 15:24',
+        isRead: true
+      }
+    ],
+    'YASAMECZ': [
+      {
+        id: 3,
+        sender: 'YASAMECZ',
+        text: 'merhaba geçleme için özür dileriz kargonuz bugün çıkar yola',
+        time: '02.08.2025 | 10:50',
+        isRead: true
+      }
+    ],
+    'gozdeecza': [
+      {
+        id: 4,
+        sender: 'gozdeecza',
+        text: 'SİPARİŞİMİZİ ACİL KARGOYA VEREBİLİR MİSİNİZ? HASTAMIZ BEKLİYOR.',
+        time: '11.08.2025 | 12:38',
+        isRead: true
+      }
+    ]
+  });
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [conversations, setConversations] = useState([
     {
       id: 1,
       name: 'Nimolai',
@@ -44,7 +84,11 @@ const MessagesPage: React.FC = () => {
       time: '11 Ağu - 12:38',
       unread: false
     }
-  ];
+  ]);
+
+  if (!user) {
+    return null;
+  }
 
   const currentChat = conversations.find(conv => conv.name === selectedChat);
 
@@ -126,9 +170,70 @@ const MessagesPage: React.FC = () => {
                 <p className="text-sm text-gray-500">Aktif</p>
               </div>
             </div>
-            <button className="text-gray-400 hover:text-gray-600">
-              <MoreVertical className="w-5 h-5" />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="text-gray-400 hover:text-gray-600 p-1"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
+              
+              {/* Dropdown Menu */}
+              {showDropdown && (
+                <div className="absolute right-0 top-8 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
+                  <button 
+                    onClick={() => {
+                      setShowDropdown(false);
+                      router.push(`/complaint?user=${encodeURIComponent(selectedChat)}`);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                  >
+                    <Flag className="w-4 h-4" />
+                    <span>Şikayet Et</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (confirm(`${selectedChat} ile olan tüm konuşmayı silmek istediğinizden emin misiniz?`)) {
+                        // Remove messages
+                        setAllMessages(prev => {
+                          const newMessages = { ...prev };
+                          delete newMessages[selectedChat];
+                          return newMessages;
+                        });
+                        // Remove from conversations list and select next conversation
+                        setConversations(prev => {
+                          const remainingConversations = prev.filter(conv => conv.name !== selectedChat);
+                          if (remainingConversations.length > 0) {
+                            setSelectedChat(remainingConversations[0].name);
+                          } else {
+                            setSelectedChat('');
+                          }
+                          return remainingConversations;
+                        });
+                        alert('Konuşma tamamen silindi!');
+                        setShowDropdown(false);
+                      }
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Konuşmayı Sil</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (confirm('Bu konuşmayı arşivlemek istediğinizden emin misiniz?')) {
+                        alert('Konuşma arşivlendi!');
+                        setShowDropdown(false);
+                      }
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                  >
+                    <Archive className="w-4 h-4" />
+                    <span>Arşivle</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Messages Area */}
@@ -139,15 +244,21 @@ const MessagesPage: React.FC = () => {
               </span>
             </div>
 
-            {/* Received Message */}
-            <div className="mb-6">
-              <div className="bg-white rounded-lg p-4 max-w-md shadow-sm">
-                <p className="text-gray-900">DUN GECE NÖNETÇIYIK 5 ADET VAR. UYGUN OLUR MU SIZIN IÇIN ?</p>
-                <div className="text-xs text-gray-500 mt-2">
-                  Okundu | 26.08.2025 | 15:33
+            {/* Messages */}
+            {(allMessages[selectedChat] || []).map((message) => (
+              <div 
+                key={message.id} 
+                className="mb-6 cursor-pointer"
+                onClick={() => alert(`Mesaj detayı:\n\nGönderen: ${message.sender}\nTarih: ${message.time}\nMesaj: ${message.text}`)}
+              >
+                <div className="bg-white rounded-lg p-4 max-w-md shadow-sm hover:shadow-md transition-shadow">
+                  <p className="text-gray-900">{message.text}</p>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {message.isRead ? 'Okundu' : 'Okunmadı'} | {message.time}
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
 
             {/* Info Message */}
             <div className="text-center text-sm text-gray-500 mb-6">
@@ -168,12 +279,24 @@ const MessagesPage: React.FC = () => {
               <button 
                 onClick={() => {
                   if (messageText.trim()) {
+                    const newMessage = {
+                      id: Date.now(),
+                      sender: 'Ben',
+                      text: messageText,
+                      time: new Date().toLocaleDateString('tr-TR') + ' | ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+                      isRead: false
+                    };
+                    setAllMessages(prev => ({
+                      ...prev,
+                      [selectedChat]: [...(prev[selectedChat] || []), newMessage]
+                    }));
                     setMessageText('');
                   }
                 }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                disabled={!messageText.trim()}
               >
-                Gönder
+                <Send className="w-4 h-4" />
               </button>
             </div>
           </div>

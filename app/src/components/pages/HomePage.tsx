@@ -3,7 +3,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Clock, Users, Search, TrendingUp, CheckCircle, ShoppingCart, Package, DollarSign, ChevronLeft, ChevronRight, Star, Eye, Compass, Plus } from 'lucide-react';
-import { useAuth } from '@/src/context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import Footer from '../layout/Footer';
 
 const HomePage: React.FC = () => {
   const router = useRouter();
@@ -17,7 +18,145 @@ const HomePage: React.FC = () => {
     savedAmount: 890.25,
   };
 
-  // If user is logged in and is a pharmacy, show the new design
+  // If user is not logged in, show welcome page
+  if (!user) {
+    return (
+      <div className="min-h-screen">
+        {/* Hero Section with Pharmacy Background */}
+        <div className="relative min-h-[80vh] md:min-h-[92vh] overflow-hidden">
+          {/* Pharmacy Background Image - single image + subtle black overlay */}
+          <div className="absolute inset-0">
+            <div className="w-full h-full relative">
+              <div
+                className="absolute inset-0 bg-[url('/images/hero-pharmacy.jpg')] bg-cover bg-center md:bg-[position:60%_center]"
+                aria-hidden="true"
+              ></div>
+              {/* slightly darker overlay (fixed) */}
+              <div className="absolute inset-0 bg-black/70 md:bg-black/60 backdrop-blur-sm" aria-hidden="true"></div>
+            </div>
+          </div>
+          
+          {/* Header */}
+          <div className="relative z-10">
+            <div className="flex justify-between items-center px-6 py-6 md:px-12">
+              <div className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm tracking-wide">
+                FarmaDepom
+              </div>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => router.push('/register')}
+                  className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg transition-colors shadow-sm border border-white/30 backdrop-blur-sm font-medium"
+                >
+                  Üye Ol
+                </button>
+                <button 
+                  onClick={() => router.push('/login')}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors shadow-md font-medium"
+                >
+                  Giriş Yap
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Main Content */}
+          <div className="relative z-10 flex items-center min-h-screen">
+            <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+              {/* Left side - empty for pharmacy image effect */}
+              <div className="hidden lg:block">
+                {/* This space represents the pharmacist in the image */}
+              </div>
+              
+              {/* Right side - Content */}
+              <div className="text-right">
+                <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-tight drop-shadow-sm">
+                  Eczanelerin ve İlaç Depolarının
+                  <br />
+                  <span className="text-green-500">Pazaryeri!</span>
+                </h1>
+                <p className="text-lg md:text-xl text-white/90 mb-8">
+                  Türkiye’deki bütün ilaç depolarıyla kolayca alışveriş yapın, karlılığınızı arttırın!
+                </p>
+                
+                {/* Input and Button */}
+                <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                  <input 
+                    type="text"
+                    placeholder="GLN Numaranızı Yazın"
+                    className="px-5 py-3 rounded-full bg-white/15 text-white placeholder-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-500/60 shadow-sm"
+                  />
+                  <button 
+                    onClick={() => router.push('/register')}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition-colors whitespace-nowrap shadow-md"
+                  >
+                    Hemen Üye Ol
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Medicine Showcase Section removed */}
+
+        {/* Features Section */}
+        <div className="bg-gray-50 py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Neden FarmaDepom?
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                İlaç tedarik sürecinizi dijitalleştirin, maliyetlerinizi düşürün, verimliliğinizi artırın.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Feature 1 */}
+              <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
+                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Güvenli Platform</h3>
+                <p className="text-gray-600">
+                  SSL şifreleme ve güvenli ödeme sistemleri ile verileriniz tamamen korunur.
+                </p>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
+                <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Clock className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Hızlı Teslimat</h3>
+                <p className="text-gray-600">
+                  Aynı gün kargo seçeneği ile acil ihtiyaçlarınızı karşılayın.
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
+                <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <DollarSign className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Uygun Fiyatlar</h3>
+                <p className="text-gray-600">
+                  Rekabetçi fiyatlar ve özel indirimlerle maliyetlerinizi optimize edin.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Section removed */}
+
+        {/* Footer */}
+        <Footer />
+      </div>
+    );
+  }
+
+  // If user is logged in and is a pharmacy, show the dashboard
   if (user && user.role === 'pharmacy') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700">

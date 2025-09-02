@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/context/AuthContext';
-import { ShoppingBag, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { ShoppingBag, Clock, CheckCircle, XCircle, ThumbsUp, Package, Truck } from 'lucide-react';
 
 const OrdersPage: React.FC = () => {
   const { user } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Siparişlerim');
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   if (!user) {
     return null;
@@ -29,6 +30,16 @@ const OrdersPage: React.FC = () => {
     setActiveTab(tab.name);
     router.push(tab.route);
   };
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
+
+  const mockProducts = [
+    { id: 1, name: 'Aspirin 500mg', barcode: '8690123456789', quantity: 50, price: 25.50, date: '2024-01-15' },
+    { id: 2, name: 'Paracetamol 500mg', barcode: '8690987654321', quantity: 30, price: 18.75, date: '2024-01-14' },
+    { id: 3, name: 'İbuprofen 400mg', barcode: '8690555666777', quantity: 25, price: 32.00, date: '2024-01-13' }
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,61 +71,166 @@ const OrdersPage: React.FC = () => {
           <p className="mt-2 text-gray-600">Tüm siparişlerinizi görüntüleyin ve takip edin.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <ShoppingBag className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Toplam Sipariş</p>
-                <p className="text-2xl font-bold text-gray-900">24</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* SATTIKLARIM */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Sattıklarım</h2>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                <div 
+                  onClick={() => toggleSection('sattiklarim-tamamlanan')}
+                  className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200 cursor-pointer hover:bg-green-100 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <ThumbsUp className="h-6 w-6 text-green-600 mr-3" />
+                    <span className="font-medium text-green-800">Tamamlananlar</span>
+                  </div>
+                </div>
+                
+                {expandedSection === 'sattiklarim-tamamlanan' && (
+                  <div className="bg-white border rounded-lg p-4 space-y-3">
+                    {mockProducts.map(product => (
+                      <div key={product.id} className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0">
+                        <div>
+                          <p className="font-medium text-gray-900">{product.name}</p>
+                          <p className="text-sm text-gray-500">Barkod: {product.barcode}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">{product.quantity} adet</p>
+                          <p className="text-sm text-green-600">₺{product.price}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div 
+                  onClick={() => toggleSection('sattiklarim-iptal')}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <XCircle className="h-6 w-6 text-gray-600 mr-3" />
+                    <span className="font-medium text-gray-800">İptal Edilenler</span>
+                  </div>
+                </div>
+                
+                {expandedSection === 'sattiklarim-iptal' && (
+                  <div className="bg-white border rounded-lg p-4">
+                    <p className="text-center text-gray-500 py-4">İptal edilen sipariş bulunmuyor</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-          
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <Clock className="h-8 w-8 text-yellow-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Beklemede</p>
-                <p className="text-2xl font-bold text-gray-900">3</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <CheckCircle className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Tamamlanan</p>
-                <p className="text-2xl font-bold text-gray-900">19</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <XCircle className="h-8 w-8 text-red-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">İptal Edilen</p>
-                <p className="text-2xl font-bold text-gray-900">2</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Son Siparişler</h2>
-          </div>
-          <div className="p-6">
-            <div className="text-center py-12">
-              <ShoppingBag className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Henüz sipariş yok</h3>
-              <p className="mt-1 text-sm text-gray-500">İlk siparişinizi vermek için ürünleri inceleyin.</p>
-              <div className="mt-6">
-                <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                  Ürünleri İncele
-                </button>
+          {/* ALDIKLARIM */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Aldıklarım</h2>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                <div 
+                  onClick={() => toggleSection('aldiklarim-hazirlanan')}
+                  className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-200 cursor-pointer hover:bg-yellow-100 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <Package className="h-6 w-6 text-yellow-600 mr-3" />
+                    <span className="font-medium text-yellow-800">Hazırlananlar</span>
+                  </div>
+                </div>
+                
+                {expandedSection === 'aldiklarim-hazirlanan' && (
+                  <div className="bg-white border rounded-lg p-4 space-y-3">
+                    {mockProducts.slice(0, 2).map(product => (
+                      <div key={product.id} className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0">
+                        <div>
+                          <p className="font-medium text-gray-900">{product.name}</p>
+                          <p className="text-sm text-gray-500">Barkod: {product.barcode}</p>
+                          <p className="text-xs text-yellow-600">Hazırlanıyor...</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">{product.quantity} adet</p>
+                          <p className="text-sm text-yellow-600">₺{product.price}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div 
+                  onClick={() => toggleSection('aldiklarim-kargo')}
+                  className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-200 cursor-pointer hover:bg-orange-100 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <Truck className="h-6 w-6 text-orange-600 mr-3" />
+                    <span className="font-medium text-orange-800">Kargodakiler</span>
+                  </div>
+                </div>
+                
+                {expandedSection === 'aldiklarim-kargo' && (
+                  <div className="bg-white border rounded-lg p-4 space-y-3">
+                    {mockProducts.slice(1, 3).map(product => (
+                      <div key={product.id} className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0">
+                        <div>
+                          <p className="font-medium text-gray-900">{product.name}</p>
+                          <p className="text-sm text-gray-500">Barkod: {product.barcode}</p>
+                          <p className="text-xs text-orange-600">Kargoda - Takip No: KRG{product.id}23456</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">{product.quantity} adet</p>
+                          <p className="text-sm text-orange-600">₺{product.price}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div 
+                  onClick={() => toggleSection('aldiklarim-tamamlanan')}
+                  className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200 cursor-pointer hover:bg-green-100 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <ThumbsUp className="h-6 w-6 text-green-600 mr-3" />
+                    <span className="font-medium text-green-800">Tamamlananlar</span>
+                  </div>
+                </div>
+                
+                {expandedSection === 'aldiklarim-tamamlanan' && (
+                  <div className="bg-white border rounded-lg p-4 space-y-3">
+                    {mockProducts.map(product => (
+                      <div key={product.id} className="flex justify-between items-center p-3 border-b border-gray-100 last:border-b-0">
+                        <div>
+                          <p className="font-medium text-gray-900">{product.name}</p>
+                          <p className="text-sm text-gray-500">Barkod: {product.barcode}</p>
+                          <p className="text-xs text-green-600">Teslim edildi - {product.date}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">{product.quantity} adet</p>
+                          <p className="text-sm text-green-600">₺{product.price}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div 
+                  onClick={() => toggleSection('aldiklarim-iptal')}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <XCircle className="h-6 w-6 text-gray-600 mr-3" />
+                    <span className="font-medium text-gray-800">İptal Edilenler</span>
+                  </div>
+                </div>
+                
+                {expandedSection === 'aldiklarim-iptal' && (
+                  <div className="bg-white border rounded-lg p-4">
+                    <p className="text-center text-gray-500 py-4">İptal edilen sipariş bulunmuyor</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

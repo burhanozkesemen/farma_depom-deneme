@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">FD</span>
               </div>
               <span className="text-xl font-bold text-gray-900">FarmaDepom</span>
@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
               <li>
                 <button 
                   onClick={() => router.push('/products')}
-                  className="text-gray-600 hover:text-blue-600"
+                  className="text-gray-600 hover:text-green-600"
                 >
                   Ürün Kataloğu
                 </button>
@@ -42,18 +42,18 @@ const Footer: React.FC = () => {
               <li>
                 <button 
                   onClick={() => router.push('/register')}
-                  className="text-gray-600 hover:text-blue-600"
+                  className="text-gray-600 hover:text-green-600"
                 >
                   Üye Ol
                 </button>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-blue-600">
+                <a href="#" className="text-gray-600 hover:text-green-600">
                   Nasıl Çalışır?
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-blue-600">
+                <a href="#" className="text-gray-600 hover:text-green-600">
                   SSS
                 </a>
               </li>
@@ -67,7 +67,7 @@ const Footer: React.FC = () => {
               <li>
                 <button 
                   onClick={() => router.push('/privacy')}
-                  className="text-gray-600 hover:text-blue-600"
+                  className="text-gray-600 hover:text-green-600"
                 >
                   KVKK Politikası
                 </button>
@@ -75,18 +75,18 @@ const Footer: React.FC = () => {
               <li>
                 <button 
                   onClick={() => router.push('/terms')}
-                  className="text-gray-600 hover:text-blue-600"
+                  className="text-gray-600 hover:text-green-600"
                 >
                   Üyelik Sözleşmesi
                 </button>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-blue-600">
+                <a href="#" className="text-gray-600 hover:text-green-600">
                   Satış Koşulları
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-blue-600">
+                <a href="#" className="text-gray-600 hover:text-green-600">
                   İade Koşulları
                 </a>
               </li>
