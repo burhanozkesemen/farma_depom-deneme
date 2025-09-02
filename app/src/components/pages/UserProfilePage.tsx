@@ -124,7 +124,10 @@ const UserProfilePage: React.FC = () => {
 
             {/* Edit Button */}
             <div className="mt-8 pt-6 border-t border-gray-200">
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={() => router.push('/settings')}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 Bilgileri Düzenle
               </button>
             </div>

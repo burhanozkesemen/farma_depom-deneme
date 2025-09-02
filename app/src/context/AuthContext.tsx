@@ -15,10 +15,15 @@ interface RegisterData {
   email: string;
   password: string;
   role: UserRole;
-  companyName: string;
-  taxId: string;
-  address: string;
-  phone: string;
+  username: string;
+  glnNumber: string;
+  pharmacyName: string;
+  pharmacistName: string;
+  pharmacyAddress: string;
+  taxOffice: string;
+  taxNumber: string;
+  automationProgram: string;
+  companyPhone: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -134,7 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         id: Date.now().toString(),
         email: userData.email,
         role: userData.role,
-        companyName: userData.companyName,
+        companyName: userData.pharmacyName,
         isVerified: true, // Auto-verify for demo
       };
 
@@ -153,6 +158,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    // Redirect to home page
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   };
 
   return (

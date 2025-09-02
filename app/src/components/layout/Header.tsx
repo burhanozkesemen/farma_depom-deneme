@@ -12,6 +12,7 @@ const Header: React.FC = () => {
   const { getItemCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const getRoleDisplayName = (role: string) => {
     switch (role) {
@@ -37,9 +38,16 @@ const Header: React.FC = () => {
     return baseItems.filter(item => item.roles.includes(user.role));
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
-    <header className="bg-purple-600 shadow-sm border-b border-purple-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-green-800 shadow-sm border-b border-green-900">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
             {/* Logo */}
@@ -52,20 +60,25 @@ const Header: React.FC = () => {
 
             {/* Search Bar */}
             {user && (
-              <div className="hidden md:flex max-w-sm ml-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Ürün adı, barkod, marka veya üye ara"
-                  className="w-full pl-10 pr-16 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-                <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-100 text-gray-600 px-3 py-1 rounded text-xs">
-                  Ara
-                </button>
-              </div>
-            </div>
-          )}
+              <form onSubmit={handleSearch} className="hidden md:flex max-w-sm ml-4">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Ürün adı, barkod, marka veya üye ara"
+                    className="w-full pl-10 pr-16 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                  <button 
+                    type="submit"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-100 text-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-200"
+                  >
+                    Ara
+                  </button>
+                </div>
+              </form>
+            )}
 
           </div>
 
@@ -92,7 +105,7 @@ const Header: React.FC = () => {
                 {/* Ücretsiz İlan Ekle Button */}
                 <button 
                   onClick={() => router.push('/ads')}
-                  className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-orange-600"
+                  className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-base font-medium hover:bg-orange-600"
                 >
                   Ücretsiz İlan Ekle
                 </button>
@@ -105,7 +118,7 @@ const Header: React.FC = () => {
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
                       className="flex items-center space-x-2 text-white hover:text-gray-200"
                     >
-                      <span className="text-sm font-medium">Ecz. Hikmet Düşme</span>
+                      <span className="text-base font-medium">Ecz. Hikmet Düşme</span>
                       <User className="w-5 h-5" />
                     </button>
                     
@@ -206,7 +219,7 @@ const Header: React.FC = () => {
                   </div>
 
                   {/* Icons */}
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 ml-auto">
 
                   <button 
                     onClick={() => router.push('/wallet')}
