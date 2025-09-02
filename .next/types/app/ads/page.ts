@@ -1,4 +1,4 @@
-// File: C:\Users\ilyas\Desktop\FarmaDepom\app\ads\page.tsx
+// File: C:\Users\ilyas\Desktop\Farma_Depom-main\app\ads\page.tsx
 import * as entry from '../../../../app/ads/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
