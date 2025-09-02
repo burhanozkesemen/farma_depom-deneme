@@ -1,0 +1,12 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/sales-panel/page": "app/sales-panel/page.js",
+  "/ads/page": "app/ads/page.js",
+  "/settings/page": "app/settings/page.js",
+  "/user-profile/page": "app/user-profile/page.js",
+  "/orders/page": "app/orders/page.js",
+  "/invoices/page": "app/invoices/page.js",
+  "/wallet/page": "app/wallet/page.js",
+  "/account-movements/page": "app/account-movements/page.js"
+}

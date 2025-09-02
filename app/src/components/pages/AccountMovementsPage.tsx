@@ -1,0 +1,113 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/src/context/AuthContext';
+import { Activity, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+
+const AccountMovementsPage: React.FC = () => {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState('Hesap Hareketlerim');
+
+  if (!user) {
+    return null;
+  }
+
+  const tabs = [
+    { name: 'Kullanıcı Bilgilerim', route: '/user-profile' },
+    { name: 'Satış Panelim', route: '/sales-panel' },
+    { name: 'İlanlarım', route: '/ads' },
+    { name: 'Siparişlerim', route: '/orders' },
+    { name: 'Faturalarım', route: '/invoices' },
+    { name: 'Cüzdanım', route: '/wallet' },
+    { name: 'Hesap Hareketlerim', route: '/account-movements' },
+    { name: 'Ayarlarım', route: '/settings' }
+  ];
+
+  const handleTabClick = (tab: { name: string; route: string }) => {
+    setActiveTab(tab.name);
+    router.push(tab.route);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Tab Navigation */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex space-x-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.name}
+                onClick={() => handleTabClick(tab)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab.name
+                    ? 'border-orange-500 text-orange-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Hesap Hareketlerim</h1>
+          <p className="mt-2 text-gray-600">Tüm finansal hareketlerinizi görüntüleyin.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <TrendingUp className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Gelen</p>
+                <p className="text-2xl font-bold text-gray-900">₺5,240</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <TrendingDown className="h-8 w-8 text-red-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Giden</p>
+                <p className="text-2xl font-bold text-gray-900">₺3,180</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <Activity className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Net</p>
+                <p className="text-2xl font-bold text-gray-900">₺2,060</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">Hareket Listesi</h2>
+          </div>
+          <div className="p-6">
+            <div className="text-center py-12">
+              <Activity className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">Henüz hareket yok</h3>
+              <p className="mt-1 text-sm text-gray-500">İşlemleriniz burada görünecek.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  );
+};
+
+export default AccountMovementsPage;
