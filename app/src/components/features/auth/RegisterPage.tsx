@@ -15,15 +15,10 @@ const RegisterPage: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    username: '',
-    glnNumber: '',
-    pharmacyName: '',
-    pharmacistName: '',
-    pharmacyAddress: '',
-    taxOffice: '',
-    taxNumber: '',
-    automationProgram: '',
-    companyPhone: '',
+    companyName: '',
+    taxId: '',
+    address: '',
+    phone: '',
     kvkkConsent: false,
     termsConsent: false,
   });
@@ -50,15 +45,10 @@ const RegisterPage: React.FC = () => {
         email: formData.email,
         password: formData.password,
         role: formData.role,
-        username: formData.username,
-        glnNumber: formData.glnNumber,
-        pharmacyName: formData.pharmacyName,
-        pharmacistName: formData.pharmacistName,
-        pharmacyAddress: formData.pharmacyAddress,
-        taxOffice: formData.taxOffice,
-        taxNumber: formData.taxNumber,
-        automationProgram: formData.automationProgram,
-        companyPhone: formData.companyPhone,
+        companyName: formData.companyName,
+        taxId: formData.taxId,
+        address: formData.address,
+        phone: formData.phone,
       });
       router.push('/dashboard');
     } catch (err) {
@@ -85,18 +75,6 @@ const RegisterPage: React.FC = () => {
         return;
       }
     }
-    if (step === 2) {
-      if (!formData.username || !formData.glnNumber || !formData.pharmacyName || !formData.pharmacistName) {
-        setError('Lütfen tüm zorunlu alanları doldurun');
-        return;
-      }
-    }
-    if (step === 3) {
-      if (!formData.pharmacyAddress || !formData.taxOffice || !formData.taxNumber || !formData.companyPhone) {
-        setError('Lütfen tüm alanları doldurun');
-        return;
-      }
-    }
     setError('');
     setStep(step + 1);
   };
@@ -111,10 +89,10 @@ const RegisterPage: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="flex items-center space-x-2">
-            <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">FD</span>
+            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">FR</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">FarmaDepom</span>
+            <span className="text-2xl font-bold text-gray-900">FarmazonRx</span>
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
@@ -124,7 +102,7 @@ const RegisterPage: React.FC = () => {
           Zaten hesabınız var mı?{' '}
           <button
             onClick={() => router.push('/login')}
-            className="font-medium text-green-600 hover:text-green-500"
+            className="font-medium text-blue-600 hover:text-blue-500"
           >
             Giriş yapın
           </button>
@@ -136,15 +114,13 @@ const RegisterPage: React.FC = () => {
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex items-center">
-              <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-green-600' : 'bg-gray-200'}`} />
-              <div className={`flex-1 h-2 rounded-full ml-2 ${step >= 2 ? 'bg-green-600' : 'bg-gray-200'}`} />
-              <div className={`flex-1 h-2 rounded-full ml-2 ${step >= 3 ? 'bg-green-600' : 'bg-gray-200'}`} />
-              <div className={`flex-1 h-2 rounded-full ml-2 ${step >= 4 ? 'bg-green-600' : 'bg-gray-200'}`} />
+              <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-blue-600' : 'bg-gray-200'}`} />
+              <div className={`flex-1 h-2 rounded-full ml-2 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`} />
+              <div className={`flex-1 h-2 rounded-full ml-2 ${step >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`} />
             </div>
             <div className="flex justify-between mt-2 text-xs text-gray-500">
-              <span>Hesap</span>
-              <span>Firma</span>
-              <span>İletişim</span>
+              <span>Hesap Bilgileri</span>
+              <span>Şirket Bilgileri</span>
               <span>Onay</span>
             </div>
           </div>
@@ -174,7 +150,7 @@ const RegisterPage: React.FC = () => {
                       />
                       <div className={`border-2 rounded-lg p-4 text-center cursor-pointer transition-colors ${
                         formData.role === 'pharmacy' 
-                          ? 'border-green-600 bg-green-50 text-green-600' 
+                          ? 'border-blue-600 bg-blue-50 text-blue-600' 
                           : 'border-gray-300 hover:border-gray-400'
                       }`}>
                         <User className="w-8 h-8 mx-auto mb-2" />
@@ -193,7 +169,7 @@ const RegisterPage: React.FC = () => {
                       />
                       <div className={`border-2 rounded-lg p-4 text-center cursor-pointer transition-colors ${
                         formData.role === 'warehouse' 
-                          ? 'border-green-600 bg-green-50 text-green-600' 
+                          ? 'border-blue-600 bg-blue-50 text-blue-600' 
                           : 'border-gray-300 hover:border-gray-400'
                       }`}>
                         <Building className="w-8 h-8 mx-auto mb-2" />
@@ -278,185 +254,84 @@ const RegisterPage: React.FC = () => {
             {step === 2 && (
               <div className="space-y-6">
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                    Kullanıcı Adı *
-                  </label>
-                  <div className="mt-1 relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      id="username"
-                      name="username"
-                      type="text"
-                      required
-                      value={formData.username}
-                      onChange={handleChange}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="ciko07"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="glnNumber" className="block text-sm font-medium text-gray-700">
-                    GLN Numarası *
-                  </label>
-                  <div className="mt-1 relative">
-                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      id="glnNumber"
-                      name="glnNumber"
-                      type="text"
-                      required
-                      value={formData.glnNumber}
-                      onChange={handleChange}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="8680001449996"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="pharmacyName" className="block text-sm font-medium text-gray-700">
-                    Eczane Adı *
+                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
+                    {formData.role === 'pharmacy' ? 'Eczane Adı' : 'Firma Adı'}
                   </label>
                   <div className="mt-1 relative">
                     <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
-                      id="pharmacyName"
-                      name="pharmacyName"
+                      id="companyName"
+                      name="companyName"
                       type="text"
                       required
-                      value={formData.pharmacyName}
+                      value={formData.companyName}
                       onChange={handleChange}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="Hürriyet Eczanesi"
+                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder={formData.role === 'pharmacy' ? 'Şifa Eczanesi' : 'ABC İlaç Deposu'}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="pharmacistName" className="block text-sm font-medium text-gray-700">
-                    Eczacı Adı & Soyadı *
+                  <label htmlFor="taxId" className="block text-sm font-medium text-gray-700">
+                    Vergi Kimlik Numarası
                   </label>
                   <div className="mt-1 relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
-                      id="pharmacistName"
-                      name="pharmacistName"
+                      id="taxId"
+                      name="taxId"
                       type="text"
                       required
-                      value={formData.pharmacistName}
+                      value={formData.taxId}
                       onChange={handleChange}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="Hikmet Düşme"
+                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="1234567890"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="automationProgram" className="block text-sm font-medium text-gray-700">
-                    Otomasyon Programı
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                    Telefon
                   </label>
-                  <div className="mt-1">
-                    <select
-                      id="automationProgram"
-                      name="automationProgram"
-                      value={formData.automationProgram}
+                  <div className="mt-1 relative">
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      required
+                      value={formData.phone}
                       onChange={handleChange}
-                      className="block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    >
-                      <option value="">Seçiniz</option>
-                      <option value="Botanik">Botanik</option>
-                      <option value="Farmasoft">Farmasoft</option>
-                      <option value="Eczane Plus">Eczane Plus</option>
-                      <option value="Diğer">Diğer</option>
-                    </select>
+                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="+90 555 123 4567"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                    Adres
+                  </label>
+                  <div className="mt-1 relative">
+                    <MapPin className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+                    <textarea
+                      id="address"
+                      name="address"
+                      rows={3}
+                      required
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Tam adres bilgileri..."
+                    />
                   </div>
                 </div>
               </div>
             )}
 
             {step === 3 && (
-              <div className="space-y-6">
-                <div>
-                  <label htmlFor="pharmacyAddress" className="block text-sm font-medium text-gray-700">
-                    Eczane Adresi *
-                  </label>
-                  <div className="mt-1 relative">
-                    <MapPin className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
-                    <textarea
-                      id="pharmacyAddress"
-                      name="pharmacyAddress"
-                      rows={3}
-                      required
-                      value={formData.pharmacyAddress}
-                      onChange={handleChange}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="Azadi Mah. Paşa Konağı Cad. 128/B Viranşehir/Şanlıurfa"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="taxOffice" className="block text-sm font-medium text-gray-700">
-                    Vergi Dairesi *
-                  </label>
-                  <div className="mt-1 relative">
-                    <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      id="taxOffice"
-                      name="taxOffice"
-                      type="text"
-                      required
-                      value={formData.taxOffice}
-                      onChange={handleChange}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="viranşehir"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="taxNumber" className="block text-sm font-medium text-gray-700">
-                    Vergi Numarası *
-                  </label>
-                  <div className="mt-1 relative">
-                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      id="taxNumber"
-                      name="taxNumber"
-                      type="text"
-                      required
-                      value={formData.taxNumber}
-                      onChange={handleChange}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="47905833548"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="companyPhone" className="block text-sm font-medium text-gray-700">
-                    Şirket Telefonu *
-                  </label>
-                  <div className="mt-1 relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      id="companyPhone"
-                      name="companyPhone"
-                      type="tel"
-                      required
-                      value={formData.companyPhone}
-                      onChange={handleChange}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="0 (554) 262 72 39"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {step === 4 && (
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h3 className="font-medium text-gray-900 mb-4">Özet</h3>
@@ -470,20 +345,12 @@ const RegisterPage: React.FC = () => {
                       <dd className="text-gray-900">{formData.email}</dd>
                     </div>
                     <div className="flex justify-between">
-                      <dt className="text-gray-600">Kullanıcı Adı:</dt>
-                      <dd className="text-gray-900">{formData.username}</dd>
+                      <dt className="text-gray-600">Firma:</dt>
+                      <dd className="text-gray-900">{formData.companyName}</dd>
                     </div>
                     <div className="flex justify-between">
-                      <dt className="text-gray-600">GLN:</dt>
-                      <dd className="text-gray-900">{formData.glnNumber}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">Eczane:</dt>
-                      <dd className="text-gray-900">{formData.pharmacyName}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">Eczacı:</dt>
-                      <dd className="text-gray-900">{formData.pharmacistName}</dd>
+                      <dt className="text-gray-600">VKN:</dt>
+                      <dd className="text-gray-900">{formData.taxId}</dd>
                     </div>
                   </dl>
                 </div>
@@ -545,11 +412,11 @@ const RegisterPage: React.FC = () => {
                 </button>
               )}
               
-              {step < 4 ? (
+              {step < 3 ? (
                 <button
                   type="button"
                   onClick={nextStep}
-                  className={`px-6 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 ${
+                  className={`px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 ${
                     step === 1 ? 'w-full' : 'ml-auto'
                   }`}
                 >
@@ -559,7 +426,7 @@ const RegisterPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="ml-auto px-6 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="ml-auto px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Oluşturuluyor...' : 'Hesabı Oluştur'}
                 </button>

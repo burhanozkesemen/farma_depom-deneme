@@ -1,396 +1,172 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Building2, MapPin, Star, Clock, Package, Phone, Mail, Filter, Search } from 'lucide-react';
+import { Building2, Home } from 'lucide-react';
+import Image from 'next/image';
 
-interface Warehouse {
+interface CsvProduct {
   id: string;
   name: string;
-  address: string;
-  city: string;
-  phone: string;
-  email: string;
-  rating: number;
-  totalProducts: number;
-  activeOrders: number;
-  deliveryTime: string;
-  isVerified: boolean;
-  specialties: string[];
-  workingHours: string;
-  distance: number;
-  lastOrderDate?: string;
-  logo?: string;
+  price: number | null;
+  imageUrl: string;
 }
+
+interface WarehouseDef {
+  slug: string;
+  name: string;
+}
+
+// Display order and names similar to screenshot
+const WAREHOUSES: WarehouseDef[] = [
+  { slug: 'land', name: 'Land' },
+  { slug: 'hamzapharma', name: 'hamzapharma' },
+  { slug: 'merkez', name: 'Merkez Depo' },
+  { slug: 'anadolu', name: 'Anadolu Depo' },
+  { slug: 'ege', name: 'Ege Depo' },
+  { slug: 'marmara', name: 'Marmara Depo' },
+];
 
 const AllWarehousesPage: React.FC = () => {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCity, setSelectedCity] = useState('all');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('all');
-  const [sortBy, setSortBy] = useState('rating');
 
-  const warehouses: Warehouse[] = [
-    {
-      id: '1',
-      name: 'Merkez İlaç Deposu',
-      address: 'Merkez Mah. Sanayi Cad. No:45',
-      city: 'İstanbul',
-      phone: '+90 212 555 0101',
-      email: 'info@merkezilac.com',
-      rating: 4.8,
-      totalProducts: 1250,
-      activeOrders: 23,
-      deliveryTime: '2-4 saat',
-      isVerified: true,
-      specialties: ['Antibiyotik', 'Analjezik', 'Vitamin'],
-      workingHours: '08:00 - 18:00',
-      distance: 2.5,
-      lastOrderDate: '2024-01-15',
-    },
-    {
-      id: '2',
-      name: 'Anadolu Eczacılık Deposu',
-      address: 'Çankaya Mah. İstanbul Cad. No:127',
-      city: 'Ankara',
-      phone: '+90 312 555 0202',
-      email: 'siparis@anadolueczacilik.com',
-      rating: 4.6,
-      totalProducts: 980,
-      activeOrders: 18,
-      deliveryTime: '4-6 saat',
-      isVerified: true,
-      specialties: ['Kardiyoloji', 'Diyabet', 'Hipertansiyon'],
-      workingHours: '09:00 - 17:00',
-      distance: 12.8,
-    },
-    {
-      id: '3',
-      name: 'Ege Sağlık Deposu',
-      address: 'Alsancak Mah. Kordon Cad. No:89',
-      city: 'İzmir',
-      phone: '+90 232 555 0303',
-      email: 'destek@egesaglik.com',
-      rating: 4.7,
-      totalProducts: 1150,
-      activeOrders: 31,
-      deliveryTime: '3-5 saat',
-      isVerified: true,
-      specialties: ['Onkoloji', 'Nöroloji', 'Gastroenteroloji'],
-      workingHours: '08:30 - 17:30',
-      distance: 7.2,
-      lastOrderDate: '2024-01-12',
-    },
-    {
-      id: '4',
-      name: 'Marmara İlaç Merkezi',
-      address: 'Osmangazi Mah. Atatürk Cad. No:234',
-      city: 'Bursa',
-      phone: '+90 224 555 0404',
-      email: 'info@marmarailac.com',
-      rating: 4.4,
-      totalProducts: 850,
-      activeOrders: 15,
-      deliveryTime: '5-7 saat',
-      isVerified: true,
-      specialties: ['Pediatri', 'Jinekoloji', 'Ortopedi'],
-      workingHours: '08:00 - 16:00',
-      distance: 18.5,
-    },
-    {
-      id: '5',
-      name: 'Karadeniz İlaç Deposu',
-      address: 'Merkez Mah. Sahil Yolu No:67',
-      city: 'Trabzon',
-      phone: '+90 462 555 0505',
-      email: 'satis@karadenizilac.com',
-      rating: 4.5,
-      totalProducts: 720,
-      activeOrders: 12,
-      deliveryTime: '6-8 saat',
-      isVerified: false,
-      specialties: ['Dermatoloji', 'Göz Hastalıkları', 'KBB'],
-      workingHours: '09:00 - 18:00',
-      distance: 25.3,
-      lastOrderDate: '2024-01-10',
-    },
-    {
-      id: '6',
-      name: 'Doğu Anadolu Eczacılık',
-      address: 'Yakutiye Mah. Cumhuriyet Cad. No:156',
-      city: 'Erzurum',
-      phone: '+90 442 555 0606',
-      email: 'info@doguanadoluec.com',
-      rating: 4.3,
-      totalProducts: 650,
-      activeOrders: 8,
-      deliveryTime: '8-12 saat',
-      isVerified: true,
-      specialties: ['Psikiyatri', 'Endokrinoloji', 'Üroloji'],
-      workingHours: '08:00 - 17:00',
-      distance: 45.7,
-    },
-  ];
+  const [items, setItems] = useState<CsvProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const cities = Array.from(new Set(warehouses.map(w => w.city))).sort();
-  const specialties = Array.from(new Set(warehouses.flatMap(w => w.specialties))).sort();
-
-  const filteredWarehouses = warehouses
-    .filter(warehouse => {
-      const matchesSearch = warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          warehouse.city.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCity = selectedCity === 'all' || warehouse.city === selectedCity;
-      const matchesSpecialty = selectedSpecialty === 'all' || warehouse.specialties.includes(selectedSpecialty);
-      
-      return matchesSearch && matchesCity && matchesSpecialty;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'rating':
-          return b.rating - a.rating;
-        case 'distance':
-          return a.distance - b.distance;
-        case 'products':
-          return b.totalProducts - a.totalProducts;
-        case 'name':
-          return a.name.localeCompare(b.name);
-        default:
-          return 0;
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/csv-products?limit=400', { cache: 'no-store' });
+        if (!res.ok) throw new Error('CSV ürünleri alınamadı');
+        const data = await res.json();
+        if (!ignore) {
+          const safe = Array.isArray(data.items)
+            ? data.items.map((p: any) => ({
+                id: String(p.id ?? p.barcode ?? Math.random()),
+                name: p.name || 'Ürün',
+                price: typeof p.price === 'number' ? p.price : 0,
+                imageUrl: p.imageUrl || '/api/placeholder/280/280',
+              }))
+            : [];
+          setItems(safe);
+          setError(null);
+        }
+      } catch (e: any) {
+        if (!ignore) setError(e?.message || 'Hata oluştu');
+      } finally {
+        if (!ignore) setLoading(false);
       }
-    });
+    }
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  // Deterministically assign products to warehouses for demo purposes
+  const hashIndex = (id: string, mod: number) => {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 131 + id.charCodeAt(i)) >>> 0;
+    return h % mod;
+  };
+
+  const grouped = useMemo(() => {
+    const map: Record<string, CsvProduct[]> = {};
+    for (const w of WAREHOUSES) map[w.slug] = [];
+    for (const it of items) {
+      const idx = hashIndex(it.id, WAREHOUSES.length);
+      const w = WAREHOUSES[idx];
+      map[w.slug].push(it);
+    }
+    return map;
+  }, [items]);
+
+  const formatTL = (v: number) => `${v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL`;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <button 
-                onClick={() => router.push('/dashboard')}
-                className="mr-4 p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Tüm Depolar</h1>
-                <p className="text-gray-600 mt-1">Anlaşmalı depolarımızı keşfedin ve sipariş verin</p>
-              </div>
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        {/* Optional background visual */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-100" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
+              <Building2 className="w-6 h-6" />
             </div>
-            <div className="flex items-center space-x-2">
-              <Building2 className="w-6 h-6 text-blue-600" />
-              <span className="text-sm font-medium text-blue-600">{warehouses.length} Depo</span>
-            </div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">Tüm Depolar</h1>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center mb-4">
-            <Filter className="w-5 h-5 mr-2 text-gray-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Filtreler</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Arama
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Depo adı veya şehir..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 pb-10">
+        {loading && (
+          <div className="bg-white rounded-2xl shadow-sm border p-8 text-center text-gray-500">Yükleniyor…</div>
+        )}
+        {error && !loading && (
+          <div className="bg-white rounded-2xl shadow-sm border p-8 text-center text-red-600">{error}</div>
+        )}
 
-            {/* City Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Şehir
-              </label>
-              <select
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">Tüm Şehirler</option>
-                {cities.map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-            </div>
+        {!loading && !error && (
+          <div className="space-y-6">
+            {WAREHOUSES.map((w) => {
+              const list = grouped[w.slug] || [];
+              const top4 = list.slice(0, 4);
+              return (
+                <div key={w.slug} className="bg-white rounded-2xl shadow-sm border">
+                  <div className="p-4 md:p-6">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                      {/* Left: warehouse info */}
+                      <div className="md:w-[260px] flex-shrink-0">
+                        <div className="flex items-center gap-2 text-gray-900 font-semibold">
+                          <Home className="w-4 h-4" />
+                          {w.name}
+                        </div>
+                        <div className="mt-2 text-sm text-blue-600">2500 TL ve üzeri kargo bedava!</div>
+                        <button
+                          onClick={() => router.push(`/affordable-prices?warehouse=${w.slug}`)}
+                          className="mt-3 inline-flex items-center justify-center gap-2 px-3 py-2 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50 text-sm"
+                        >
+                          Tüm Ürünleri Gör ({list.length})
+                        </button>
+                      </div>
 
-            {/* Specialty Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Uzmanlık
-              </label>
-              <select
-                value={selectedSpecialty}
-                onChange={(e) => setSelectedSpecialty(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">Tüm Uzmanlıklar</option>
-                {specialties.map(specialty => (
-                  <option key={specialty} value={specialty}>{specialty}</option>
-                ))}
-              </select>
-            </div>
+                      {/* Right: top 4 products */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+                        {top4.map((p) => (
+                          <div key={p.id} className="group relative border rounded-xl p-3 hover:shadow-md transition-all duration-200 overflow-hidden">
+                            <div className="w-full h-28 bg-gray-50 rounded-lg border flex items-center justify-center overflow-hidden">
+                              <Image src={p.imageUrl} alt={p.name} width={180} height={180} className="object-contain w-full h-full transition-transform duration-200 group-hover:scale-105" unoptimized />
+                            </div>
+                            <div className="mt-2 text-sm font-medium text-gray-900 line-clamp-2">{p.name}</div>
+                            <div className="mt-1 text-gray-900 font-semibold">{formatTL(p.price ?? 0)}</div>
+                            {/* Hover actions */}
+                            <div className="mt-2 pointer-events-none opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
+                              <button
+                                onClick={() => router.push(`/product/${encodeURIComponent(p.id)}`)}
+                                className="pointer-events-auto w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 rounded-lg"
+                              >
+                                Ürüne git
+                              </button>
+                            </div>
+                          </div>
+                        ))}
 
-            {/* Sort */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sıralama
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="rating">Değerlendirme</option>
-                <option value="distance">Mesafe</option>
-                <option value="products">Ürün Sayısı</option>
-                <option value="name">Alfabetik</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mt-4 text-sm text-gray-600">
-            {filteredWarehouses.length} depo bulundu
-          </div>
-        </div>
-
-        {/* Warehouses Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredWarehouses.map((warehouse) => (
-            <div 
-              key={warehouse.id} 
-              onClick={() => router.push(`/warehouse/${warehouse.id}`)}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-            >
-              <div className="p-6">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{warehouse.name}</h3>
-                        {warehouse.isVerified && (
-                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                            Onaylı
-                          </span>
+                        {top4.length === 0 && (
+                          <div className="col-span-full text-sm text-gray-500">Bu depoda listelenecek ürün bulunamadı.</div>
                         )}
                       </div>
-                      <div className="flex items-center mt-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm text-gray-600 ml-1">{warehouse.rating}</span>
-                        <span className="text-gray-400 mx-2">•</span>
-                        <span className="text-sm text-gray-600">{warehouse.distance} km</span>
-                      </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Address */}
-                <div className="flex items-start mb-4">
-                  <MapPin className="w-4 h-4 text-gray-400 mt-0.5 mr-2" />
-                  <div>
-                    <p className="text-sm text-gray-900">{warehouse.address}</p>
-                    <p className="text-sm text-gray-600">{warehouse.city}</p>
-                  </div>
-                </div>
-
-                {/* Contact Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div className="flex items-center">
-                    <Phone className="w-4 h-4 text-gray-400 mr-2" />
-                    <span className="text-sm text-gray-900">{warehouse.phone}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Mail className="w-4 h-4 text-gray-400 mr-2" />
-                    <span className="text-sm text-gray-900">{warehouse.email}</span>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="text-lg font-bold text-gray-900">{warehouse.totalProducts}</div>
-                    <div className="text-xs text-gray-600">Ürün</div>
-                  </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="text-lg font-bold text-gray-900">{warehouse.activeOrders}</div>
-                    <div className="text-xs text-gray-600">Aktif Sipariş</div>
-                  </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="text-lg font-bold text-gray-900">{warehouse.deliveryTime}</div>
-                    <div className="text-xs text-gray-600">Teslimat</div>
-                  </div>
-                </div>
-
-                {/* Specialties */}
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Uzmanlık Alanları:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {warehouse.specialties.slice(0, 3).map((specialty) => (
-                      <span key={specialty} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                        {specialty}
-                      </span>
-                    ))}
-                    {warehouse.specialties.length > 3 && (
-                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
-                        +{warehouse.specialties.length - 3} daha
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Working Hours */}
-                <div className="flex items-center mb-4">
-                  <Clock className="w-4 h-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-600">Çalışma Saatleri: {warehouse.workingHours}</span>
-                </div>
-
-                {/* Last Order */}
-                {warehouse.lastOrderDate && (
-                  <div className="mb-4">
-                    <p className="text-xs text-gray-500">
-                      Son sipariş: {new Date(warehouse.lastOrderDate).toLocaleDateString('tr-TR')}
-                    </p>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex space-x-3">
-                  <div className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium text-center">
-                    Ürünleri Görüntüle
-                  </div>
-                  <div className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg">
-                    İletişim
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Load More */}
-        <div className="text-center mt-8">
-          <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium">
-            Daha Fazla Göster
-          </button>
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Filter, Grid, List, ShoppingCart, Star, Shield } from 'lucide-react';
-import { useCart } from '@/context/CartContext';
-import { Product } from '@/types';
+import { useCart } from '@/src/context/CartContext';
+import { Product } from '@/src/types';
 
 const ProductsPage: React.FC = () => {
   const router = useRouter();

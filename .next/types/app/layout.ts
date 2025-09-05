@@ -1,4 +1,4 @@
-// File: C:\Users\ilyas\Desktop\Farma_Depom-main\app\layout.tsx
+// File: C:\farm-main\Farma_Depom\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
