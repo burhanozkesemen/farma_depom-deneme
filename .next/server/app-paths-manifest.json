@@ -1,7 +1,7 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/register/page": "app/register/page.js",
-  "/login/page": "app/login/page.js",
-  "/user-profile/page": "app/user-profile/page.js"
+  "/api/csv-products/route": "app/api/csv-products/route.js",
+  "/all-warehouses/page": "app/all-warehouses/page.js",
+  "/medicine-categories/page": "app/medicine-categories/page.js"
 }

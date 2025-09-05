@@ -15,15 +15,10 @@ interface RegisterData {
   email: string;
   password: string;
   role: UserRole;
-  username: string;
-  glnNumber: string;
-  pharmacyName: string;
-  pharmacistName: string;
-  pharmacyAddress: string;
-  taxOffice: string;
-  taxNumber: string;
-  automationProgram: string;
-  companyPhone: string;
+  companyName: string;
+  taxId: string;
+  address: string;
+  phone: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,21 +40,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      const savedUser = localStorage.getItem('user');
-      
-      if (token && savedUser) {
-        try {
-          const user = JSON.parse(savedUser);
-          setUser(user);
-        } catch (error) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-        }
-      }
-    }
+    // Test için default user
+    const testUser: User = {
+      id: '1',
+      email: 'test@eczane.com',
+      role: 'pharmacy',
+      companyName: 'Test Eczanesi',
+      isVerified: true,
+    };
+    setUser(testUser);
     setIsLoading(false);
   }, []);
 
@@ -139,7 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         id: Date.now().toString(),
         email: userData.email,
         role: userData.role,
-        companyName: userData.pharmacyName,
+        companyName: userData.companyName,
         isVerified: true, // Auto-verify for demo
       };
 
@@ -158,10 +147,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    // Redirect to home page
-    if (typeof window !== 'undefined') {
-      window.location.href = '/';
-    }
   };
 
   return (

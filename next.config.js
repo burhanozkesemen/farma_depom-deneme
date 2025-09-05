@@ -4,10 +4,13 @@ const nextConfig = {
     domains: ['localhost'],
   },
   async rewrites() {
+    const external = process.env.EXTERNAL_API_URL;
+    if (!external) return [];
+    const base = external.endsWith('/') ? external.slice(0, -1) : external;
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:4000/api/:path*',
+        destination: `${base}/api/:path*`,
       },
     ];
   },

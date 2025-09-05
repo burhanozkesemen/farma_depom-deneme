@@ -1,252 +1,263 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
+import { ChevronRight, Grid3X3, List, Search, ShoppingCart } from 'lucide-react';
+import Image from 'next/image';
 
-interface NearExpiryProduct {
+interface CsvProduct {
   id: string;
   name: string;
-  dosage: string;
-  originalPrice: number;
-  discountedPrice: number;
-  discountPercentage: number;
-  warehouseName: string;
-  expiryDate: string;
-  stock: number;
-  image: string;
+  manufacturer?: string | null;
+  barcode?: string | null;
+  prescriptionType?: string | null;
+  ingredient?: string | null;
+  price: number | null;
+  imageUrl: string;
 }
+
+type SortTab = 'date' | 'ordercount' | 'bestprice';
 
 const NearExpiryPage: React.FC = () => {
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState('Tümü');
 
-  const nearExpiryProducts: NearExpiryProduct[] = [
-    {
-      id: 'selvita-d3-300000',
-      name: 'Selvita-D3 IM 300.000',
-      dosage: 'IU/ml 1 Oral Ampul',
-      originalPrice: 18.50,
-      discountedPrice: 11.84,
-      discountPercentage: 36,
-      warehouseName: 'Merkez Depo',
-      expiryDate: '2024-04-15',
-      stock: 45,
-      image: '/selvita-d3-image.jpg'
-    },
-    {
-      id: 'avaxim-25-pediatrik',
-      name: 'Avaxim 25 µg/0.5ml Pediatrik',
-      dosage: 'Enjeksiyonluk Süspansiyon',
-      originalPrice: 89.50,
-      discountedPrice: 60.23,
-      discountPercentage: 33,
-      warehouseName: 'Sanofi Depo',
-      expiryDate: '2024-05-20',
-      stock: 28,
-      image: '/avaxim-image.jpg'
-    },
-    {
-      id: 'gimox-1mg-tablet',
-      name: 'Gimox 1 mg 30 Tablet',
-      dosage: '30 Film Tablet',
-      originalPrice: 45.80,
-      discountedPrice: 30.26,
-      discountPercentage: 34,
-      warehouseName: 'Abdi İbrahim',
-      expiryDate: '2024-03-28',
-      stock: 67,
-      image: '/gimox-image.jpg'
-    },
-    {
-      id: 'zefir-500mg-tablet',
-      name: 'Zefir 500 mg Film Tablet',
-      dosage: '10 Film Tablet',
-      originalPrice: 32.40,
-      discountedPrice: 21.36,
-      discountPercentage: 34,
-      warehouseName: 'Deva Holding',
-      expiryDate: '2024-04-10',
-      stock: 89,
-      image: '/zefir-image.jpg'
-    },
-    {
-      id: 'cortef-10mg-tablet',
-      name: 'Cortef 10 mg Tablet',
-      dosage: '30 Tablet',
-      originalPrice: 52.70,
-      discountedPrice: 34.28,
-      discountPercentage: 35,
-      warehouseName: 'Pfizer Türkiye',
-      expiryDate: '2024-05-05',
-      stock: 34,
-      image: '/cortef-image.jpg'
-    },
-    {
-      id: 'terbix-krem-1-tup',
-      name: 'Terbix Krem %1 15 gr',
-      dosage: '1 Tüp',
-      originalPrice: 28.90,
-      discountedPrice: 18.79,
-      discountPercentage: 35,
-      warehouseName: 'Biofarma',
-      expiryDate: '2024-06-12',
-      stock: 156,
-      image: '/terbix-image.jpg'
-    },
-    {
-      id: 'lamictal-25mg-tablet',
-      name: 'Lamictal 25 mg Film Tablet',
-      dosage: '56 Film Tablet',
-      originalPrice: 78.60,
-      discountedPrice: 51.09,
-      discountPercentage: 35,
-      warehouseName: 'GlaxoSmithKline',
-      expiryDate: '2024-07-18',
-      stock: 23,
-      image: '/lamictal-image.jpg'
-    },
-    {
-      id: 'lamictal-100mg-tablet',
-      name: 'Lamictal 100 mg Film Tablet',
-      dosage: '30 Film Tablet',
-      originalPrice: 95.40,
-      discountedPrice: 62.01,
-      discountPercentage: 35,
-      warehouseName: 'GlaxoSmithKline',
-      expiryDate: '2024-08-25',
-      stock: 41,
-      image: '/lamictal-100-image.jpg'
+  // UI state
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortTab, setSortTab] = useState<SortTab>('date'); // Miada Göre (default)
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Data state
+  const [items, setItems] = useState<CsvProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/csv-products?limit=120', { cache: 'no-store' });
+        if (!res.ok) throw new Error('CSV ürünleri alınamadı');
+        const data = await res.json();
+        if (!ignore) {
+          const safe = Array.isArray(data.items)
+            ? (data.items as CsvProduct[]).map((p) => ({
+                ...p,
+                price: typeof p.price === 'number' ? p.price : 0,
+                imageUrl: p.imageUrl || '/api/placeholder/280/280',
+                name: p.name || 'Ürün',
+              }))
+            : [];
+          setItems(safe);
+          setError(null);
+        }
+      } catch (e: any) {
+        if (!ignore) setError(e?.message || 'Hata oluştu');
+      } finally {
+        if (!ignore) setLoading(false);
+      }
     }
-  ];
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
-  const categories = ['Tümü', 'Tablet', 'Kapsül', 'Şurup', 'Ampul', 'Krem'];
+  const formatTL = (v: number) => `${v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL`;
 
-  const filteredProducts = nearExpiryProducts.filter(product => {
-    if (selectedCategory === 'Tümü') return true;
-    return product.dosage.toLowerCase().includes(selectedCategory.toLowerCase());
-  });
+  // Stable pseudo discount percentage 5-65 based on id hash
+  const discountOf = (id: string) => {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+    return 5 + (h % 61); // 5..65
+  };
+
+  // Deterministic pseudo expiry date within next 1..6 months; used for label + sort
+  const expiryOf = (id: string) => {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 131 + id.charCodeAt(i)) >>> 0;
+    const monthsAhead = 1 + (h % 6); // 1..6 months
+    const d = new Date();
+    d.setMonth(d.getMonth() + monthsAhead);
+    d.setDate(1);
+    return d;
+  };
+  const formatMiatTR = (d: Date) =>
+    d.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' }); // "Eylül 2025"
+
+  const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    let arr = items.filter((p) =>
+      !q ||
+      p.name.toLowerCase().includes(q) ||
+      (p.ingredient?.toLowerCase().includes(q) ?? false) ||
+      (p.manufacturer?.toLowerCase().includes(q) ?? false)
+    );
+
+    if (sortTab === 'bestprice') {
+      arr = arr.slice().sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+    } else if (sortTab === 'date') {
+      arr = arr
+        .slice()
+        .sort((a, b) => expiryOf(a.id).getTime() - expiryOf(b.id).getTime()); // nearest first
+    }
+    // 'ordercount' fallback: keep original order
+    return arr;
+  }, [items, searchQuery, sortTab]);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with Purple Background */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <button 
-                onClick={() => router.push('/home')}
-                className="mr-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <div className="flex items-center mb-2">
-                  <div className="bg-yellow-400 text-purple-800 px-3 py-1 rounded-full text-sm font-bold mr-3">
-                    📦 Yakın Miat
-                  </div>
-                </div>
-                <h1 className="text-2xl font-bold">Yakın miat ürünleri büyük indirimlerle sizi bekliyor!</h1>
-              </div>
-            </div>
+      {/* Breadcrumb */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center text-sm text-gray-600">
+            <button onClick={() => router.push('/')} className="hover:text-blue-600 transition-colors">
+              Ana Sayfa
+            </button>
+            <ChevronRight className="w-4 h-4 mx-2" />
+            <span className="text-gray-900 font-medium">Yakın Miat</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Category Filters */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
+      {/* Hero banner like reference */}
+      <section className="bg-gradient-to-r from-[#1bb56b] via-[#22a0d7] to-[#1e69ff]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-14">
+          <div className="text-white">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-2xl">📅</div>
+              <h1 className="text-2xl md:text-3xl font-extrabold">Yakın Miat</h1>
+            </div>
+            <p className="max-w-3xl text-sm md:text-base text-white/90">
+              Yakın miatlı ürünler FarmazonRx’e özel fırsatlar!
+            </p>
+          </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <div 
-              key={product.id}
-              onClick={() => router.push(`/product/${product.id}`)}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all cursor-pointer group"
-            >
-              {/* Green Badge */}
-              <div className="relative">
-                <div className="absolute top-3 left-3 z-10">
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                    Yakın miat ürünü
-                  </span>
-                </div>
-                
-                {/* Product Image Placeholder */}
-                <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-xl flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-white/20 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                      <span className="text-2xl">💊</span>
-                    </div>
-                    <div className="text-sm font-medium text-gray-700">{product.name.split(' ')[0]}</div>
-                  </div>
+          {/* Tabs container */}
+          <div className="mt-6 bg-white rounded-xl shadow-sm p-3 md:p-4">
+            <div className="flex items-center justify-between">
+              {/* Sort tabs */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSortTab('date')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                    sortTab === 'date' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Miada Göre
+                </button>
+                <button
+                  onClick={() => setSortTab('ordercount')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                    sortTab === 'ordercount' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Çok Satanlar
+                </button>
+                <button
+                  onClick={() => setSortTab('bestprice')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                    sortTab === 'bestprice' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  En Uygunlar
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="hidden md:block w-80">
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Ürün adı veya barkod ara"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
               </div>
 
-              <div className="p-4">
-                {/* Product Name */}
-                <h3 className="font-bold text-gray-900 mb-1 text-sm leading-tight group-hover:text-blue-600 transition-colors">
-                  {product.name}
-                </h3>
-                <p className="text-xs text-gray-600 mb-3">{product.dosage}</p>
-
-                {/* Price */}
-                <div className="mb-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-gray-900">{product.discountedPrice.toFixed(2)} TL</span>
-                    <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-bold">
-                      %{product.discountPercentage}
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-500 line-through">
-                    Piyasa: {product.originalPrice.toFixed(2)} TL
-                  </div>
-                </div>
-
-                {/* Warehouse Info */}
-                <div className="text-xs text-gray-600 mb-3">
-                  <div>SKT: {new Date(product.expiryDate).toLocaleDateString('tr-TR')}</div>
-                  <div>{product.warehouseName}</div>
-                </div>
-
-                {/* Stock and Add Button */}
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">{(product.stock || 0)} adet stokta</span>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Add to cart logic here
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
-                  >
-                    <ShoppingCart className="w-4 h-4" />
-                  </button>
-                </div>
+              {/* View switch */}
+              <div className="hidden md:flex items-center gap-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
               </div>
             </div>
-          ))}
+          </div>
         </div>
+      </section>
 
-        {/* Load More Button */}
-        <div className="text-center mt-8">
-          <button className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 font-medium transition-colors">
-            Daha Fazla Ürün Göster
-          </button>
+      {/* Products section */}
+      <div className="-mt-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-sm border p-4 md:p-6">
+            {loading && <div className="py-12 text-center text-gray-500">Yükleniyor…</div>}
+            {error && !loading && <div className="py-12 text-center text-red-600">{error}</div>}
+
+            {!loading && !error && (
+              <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5' : 'space-y-4'}>
+                {filtered.map((p) => {
+                  const miat = expiryOf(p.id);
+                  return (
+                    <div key={p.id} className={`group relative border rounded-xl bg-white ${viewMode === 'list' ? 'flex p-3' : 'p-3'} hover:shadow-md transition-all duration-200`}>
+                      <div className={`${viewMode === 'list' ? 'w-32 h-32 mr-4 flex-shrink-0' : 'w-full h-40'} bg-gray-50 rounded-lg border flex items-center justify-center overflow-hidden`}>
+                        <Image src={p.imageUrl} alt={p.name} width={220} height={220} className="object-contain w-full h-full transition-transform duration-200 group-hover:scale-105" unoptimized />
+                      </div>
+
+                      <div className={viewMode === 'list' ? 'flex-1' : ''}>
+                        {/* discount badge */}
+                        <div className="mt-3">
+                          <span className="inline-block text-xs font-semibold text-white bg-green-600 rounded-full px-2 py-1">
+                            %{discountOf(p.id)} daha uygun
+                          </span>
+                        </div>
+
+                        {/* title */}
+                        <h3 className={`text-gray-900 font-semibold ${viewMode === 'list' ? 'text-base' : 'text-sm'} mt-2 line-clamp-2`}>
+                          {p.name}
+                        </h3>
+
+                        {/* price */}
+                        <div className="mt-2 flex items-center justify-between">
+                          <div className="text-lg font-bold text-gray-900">{formatTL(p.price ?? 0)}</div>
+                        </div>
+
+                        {/* miat + manufacturer */}
+                        <div className="mt-2 text-xs">
+                          <div className="text-[#e75151]">Miat: {formatMiatTR(miat)}</div>
+                          <div className="text-gray-500 mt-1">{p.manufacturer || 'Depo'}</div>
+                        </div>
+
+                        {/* chips */}
+                        <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-600">
+                          <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-gray-100 border">
+                            2500 TL üzeri kargo bedava!
+                          </span>
+                        </div>
+
+                        {/* actions: visible on hover */}
+                        <div className="mt-3 pointer-events-none opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
+                          <button className="pointer-events-auto w-full bg-[#1E69FF] hover:bg-[#1557d6] text-white text-sm font-semibold py-2 rounded-lg inline-flex items-center justify-center gap-2">
+                            <ShoppingCart className="w-4 h-4" /> Sepete Ekle
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
